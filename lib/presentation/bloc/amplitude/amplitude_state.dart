@@ -34,3 +34,14 @@ class AmplitudeStateError extends AmplitudeState{
   @override
   List<Object> get props => [ex??const UnknownError()];
 }
+
+extension AmplitudeStateExtension on AmplitudeState{
+  bool get isLoaded{
+    switch(this){
+      case AmplitudeStateExtracted(data: _):
+        return true;
+      default:
+        return false;
+    }
+  }
+}

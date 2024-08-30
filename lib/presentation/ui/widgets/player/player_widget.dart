@@ -7,7 +7,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:music_visualizer/core/extensions/context_extension.dart';
 import 'package:music_visualizer/presentation/bloc/amplitude/amplitude_bloc.dart';
-import 'package:music_visualizer/presentation/ui/widgets/wave_widget.dart';
+import 'package:music_visualizer/presentation/ui/widgets/common_shimmer.dart';
+import 'package:music_visualizer/presentation/ui/widgets/wave/wave_widget.dart';
 
 class PlayerWidget extends StatefulWidget {
   final File file;
@@ -43,7 +44,7 @@ class _PlayerWidgetState extends State<PlayerWidget> with SingleTickerProviderSt
     });
 
     WidgetsBinding.instance.addPostFrameCallback((_) async{
-      context.read<AmplitudeBloc>().add(ExtractAmplitude(file: widget.file));
+      _loadAmitude();
     });
   }
 
@@ -58,6 +59,10 @@ class _PlayerWidgetState extends State<PlayerWidget> with SingleTickerProviderSt
     super.dispose();
     audioPlayer.dispose();
     playerCompletionSubscription.cancel();
+  }
+
+  void _loadAmitude(){
+    context.read<AmplitudeBloc>().add(ExtractAmplitude(file: widget.file));
   }
 
   Future<void> _playAudio() async{
@@ -77,13 +82,14 @@ class _PlayerWidgetState extends State<PlayerWidget> with SingleTickerProviderSt
 
   @override
   Widget build(BuildContext context) {
+    final amplitudeState = context.watch<AmplitudeBloc>();
     return Container(
       height: context.screenHeightPercentage(25),
       width: context.screenWidth,
       padding: EdgeInsets.symmetric(horizontal: 20.w),
       child: Card(
         elevation: 10,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
         child: Stack(
           alignment: Alignment.centerLeft,
           children: [
@@ -98,7 +104,7 @@ class _PlayerWidgetState extends State<PlayerWidget> with SingleTickerProviderSt
                       return Container(
                       width: (context.screenWidth-(20.w*2))*(snapshot.data!.inMicroseconds/futSnapshot.data!.inMicroseconds),
                       decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(10.r),
                       color: Colors.black12,
                     ),
                     );
@@ -118,7 +124,7 @@ class _PlayerWidgetState extends State<PlayerWidget> with SingleTickerProviderSt
                   padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 8.h),
                   child: Row(children: [
                     ElevatedButton(
-                      onPressed: ()async{
+                      onPressed: amplitudeState.state.isLoaded? ()async{
                         if(!playNotifier.value){
                           await _playAudio();
                           playNotifier.value = true;
@@ -126,7 +132,7 @@ class _PlayerWidgetState extends State<PlayerWidget> with SingleTickerProviderSt
                           await _pauseAudio();
                           playNotifier.value = false;
                         }
-                      },
+                      }:null,
                       style: ElevatedButton.styleFrom(
                         elevation: 0,
                         padding: const EdgeInsets.all(5),
@@ -146,7 +152,7 @@ class _PlayerWidgetState extends State<PlayerWidget> with SingleTickerProviderSt
                           case AmplitudeStateInitial():
                             return const SizedBox.shrink();
                           case AmplitudeStateExtracting():
-                            return const CircularProgressIndicator();
+                            return const Expanded(child: CommonPlaceHolder(cornerRadius: 10,));
                           case AmplitudeStateExtracted(data: var  data):
                             return Expanded(child: AnimatedBuilder(
                               animation: CurvedAnimation(parent: animationController, curve: Curves.bounceInOut,),
@@ -155,7 +161,13 @@ class _PlayerWidgetState extends State<PlayerWidget> with SingleTickerProviderSt
                               },
                             ));
                           case AmplitudeStateError(ex: _):
-                            return const SizedBox.shrink();
+                            return Expanded(
+                                child: Center(
+                                child: IconButton(
+                                  onPressed: (){
+                                    _loadAmitude();
+                                  },
+                                  icon: const Icon(Icons.replay)),));
                         }
                       }),
                   ],),

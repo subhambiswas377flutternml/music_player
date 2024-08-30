@@ -26,3 +26,9 @@ class FunctionalError extends AppException{
 
   final String? message;
 }
+
+class NoInternetError extends AppException{
+  const NoInternetError({this.message});
+
+  final String? message;
+}

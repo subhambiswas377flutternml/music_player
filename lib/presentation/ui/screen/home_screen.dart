@@ -2,8 +2,12 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:music_visualizer/core/extensions/context_extension.dart';
 import 'package:music_visualizer/presentation/bloc/music/music_bloc.dart';
-import 'package:music_visualizer/presentation/ui/widgets/player_widget.dart';
+import 'package:music_visualizer/presentation/ui/widgets/common_shimmer.dart';
+import 'package:music_visualizer/presentation/ui/widgets/player/player_error_widget.dart';
+import 'package:music_visualizer/presentation/ui/widgets/player/player_widget.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -38,11 +42,15 @@ class _HomeScreenState extends State<HomeScreen> {
             case MusicStateInitial():
               return const SizedBox.shrink();
             case MusicStateLoading():
-              return const CircularProgressIndicator();
+              return CommonPlaceHolder(
+                margin: EdgeInsets.symmetric(horizontal: 20.w),
+                cornerRadius: 10,
+                height: contex.screenHeightPercentage(25),
+                width: contex.screenWidth);
             case MusicStateLoaded(file: File file):
               return PlayerWidget(file: file,);
             case MusicStateError(ex: var _):
-              return const Text("Error!");
+              return const PlayerErrorWidget();
           }
         })
       )
