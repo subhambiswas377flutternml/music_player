@@ -88,7 +88,7 @@ class _PlayerWidgetState extends State<PlayerWidget> with SingleTickerProviderSt
       width: context.screenWidth,
       padding: EdgeInsets.symmetric(horizontal: 20.w),
       child: Card(
-        elevation: 10,
+        elevation: 20,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
         child: Stack(
           alignment: Alignment.centerLeft,
