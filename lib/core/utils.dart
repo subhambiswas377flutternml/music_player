@@ -12,7 +12,7 @@ class Utils{
     try{
       const int sampleNumber = 50;
       final waveformExtractor = WaveformExtractor();
-      final result = await waveformExtractor.extractWaveform(file.path);
+      final result = await waveformExtractor.extractWaveform(file.path, useCache: false);
       final waveformData = result.waveformData.reduceListSize(targetSize: sampleNumber);
 
       log(file.path);

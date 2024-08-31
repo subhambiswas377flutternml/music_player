@@ -59,6 +59,7 @@ class _PlayerWidgetState extends State<PlayerWidget> with SingleTickerProviderSt
     super.dispose();
     audioPlayer.dispose();
     playerCompletionSubscription.cancel();
+    playNotifier.dispose();
   }
 
   void _loadAmitude(){

@@ -30,6 +30,8 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
+        height: context.screenHeight,
+        width: context.screenWidth,
         alignment: Alignment.center,
         decoration: const BoxDecoration(
           gradient: LinearGradient(colors: [
