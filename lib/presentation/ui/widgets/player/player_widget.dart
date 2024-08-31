@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:audioplayers/audioplayers.dart';
+import 'package:just_audio/just_audio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -38,20 +38,23 @@ class _PlayerWidgetState extends State<PlayerWidget> with SingleTickerProviderSt
     );
     animation = Tween<double>(begin: 1.0, end: 2.0).animate(animationController);
 
-    playerCompletionSubscription = audioPlayer .onPlayerComplete.listen((event){
+    playerCompletionSubscription = audioPlayer.playerStateStream.listen((state){
       playNotifier.value = false;
       _resetAudio();
     });
 
     WidgetsBinding.instance.addPostFrameCallback((_) async{
-      _loadAmitude();
+      _loadAmplitude();
     });
   }
 
   Future<Duration> _setAndGetDuration() async{
-    await audioPlayer.setSourceDeviceFile(widget.file.path);
-    await audioPlayer.setReleaseMode(ReleaseMode.stop);
-    return await audioPlayer.getDuration()?? const Duration(seconds: 1);
+    final duration = await audioPlayer.setAudioSource(AudioSource.file(widget.file.path));
+    if(duration==null){
+      return const Duration(seconds: 0);
+    }else{
+      return duration;
+    }
   }
 
   @override
@@ -59,25 +62,26 @@ class _PlayerWidgetState extends State<PlayerWidget> with SingleTickerProviderSt
     super.dispose();
     audioPlayer.dispose();
     playerCompletionSubscription.cancel();
+    playNotifier.dispose();
   }
 
-  void _loadAmitude(){
+  void _loadAmplitude(){
     context.read<AmplitudeBloc>().add(ExtractAmplitude(file: widget.file));
   }
 
-  Future<void> _playAudio() async{
-    await audioPlayer.resume();
+  void _playAudio(){
+    audioPlayer.play();
     animationController.repeat(reverse: true);
   }
 
-  Future<void> _pauseAudio() async{
-    await audioPlayer.pause();
+  void _pauseAudio(){
+    // audioPlayer.pause();
     animationController.stop();
   }
 
-  Future<void> _resetAudio() async{
+  void _resetAudio(){
+    // await audioPlayer.seek(Duration.zero);
     animationController.reset();
-    await audioPlayer.seek(Duration.zero);
   }
 
   @override
@@ -98,7 +102,7 @@ class _PlayerWidgetState extends State<PlayerWidget> with SingleTickerProviderSt
               builder: (context, futSnapshot) {
                 if(futSnapshot.hasData){
                   return StreamBuilder(
-                  stream: audioPlayer.onPositionChanged,
+                  stream: audioPlayer.positionStream ,
                   builder: (context, snapshot){
                     if(snapshot.hasData){
                       return Container(
@@ -124,12 +128,12 @@ class _PlayerWidgetState extends State<PlayerWidget> with SingleTickerProviderSt
                   padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 8.h),
                   child: Row(children: [
                     ElevatedButton(
-                      onPressed: amplitudeState.state.isLoaded? ()async{
+                      onPressed: amplitudeState.state.isLoaded? (){
                         if(!playNotifier.value){
-                          await _playAudio();
+                          _playAudio();
                           playNotifier.value = true;
                         }else{
-                          await _pauseAudio();
+                          _pauseAudio();
                           playNotifier.value = false;
                         }
                       }:null,
@@ -165,7 +169,7 @@ class _PlayerWidgetState extends State<PlayerWidget> with SingleTickerProviderSt
                                 child: Center(
                                 child: IconButton(
                                   onPressed: (){
-                                    _loadAmitude();
+                                    _loadAmplitude();
                                   },
                                   icon: const Icon(Icons.replay)),));
                         }

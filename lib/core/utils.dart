@@ -16,6 +16,7 @@ class Utils{
       final waveformData = result.waveformData.reduceListSize(targetSize: sampleNumber);
 
       log(file.path);
+      log(waveformData.toString());
       return DataStateSuccess<ListDouble>(data: waveformData);
     }
     catch(ex){

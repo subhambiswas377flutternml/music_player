@@ -39,11 +39,11 @@ dependencies:
   path_provider: ^2.1.4
   waveform_extractor: ^1.0.3
   flutter_screenutil: ^5.9.3
-  audioplayers: ^6.1.0
   flutter_bloc: ^8.1.6
   equatable: ^2.0.5
   shimmer: ^3.0.0
   internet_connection_checker: ^2.0.0
+  just_audio: ^0.9.40
 
 dev_dependencies:
   flutter_test:
